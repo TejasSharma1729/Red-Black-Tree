@@ -5,9 +5,11 @@ This is a single map interface, complete with copy constructors, constructors, a
 
 This does not directly support sets, multisets, or multimaps. Instead, for sets, the value can be a boolean datatype, and for multiset, an integer type (number of occurrences), with first addition with value 1 and addition or subtraction of 1 to the value on subsequent insertion or deletion, and deletion of key when the value reaches 0. For multimaps, the value datatype can be a vector of datatypes. These are workarounds for the aforementioned data structures, if needed.
 
-The ordering in the inbuilt Red Black Tree is based on the key alone, as expected. This does not support comparator overloading for key datatype (unlike STL map) and comparisons like ==, < across two different dictionaries. Further, it will not work for partially ordered or unordered datatypes since it is not a hashmap. It requires fully ordered types, preferably integer, floating, string, or tuple datatypes as keys. There are no restrictions on the value datatypes.
+The ordering in the inbuilt Red Black Tree is based on the key alone, as expected. This does not support comparator overloading for key datatype (unlike STL map) and comparisons like ==, < across two different dictionaries. Further, it will not work for partially ordered or unordered datatypes since it is not a hashmap. It requires fully ordered types, preferably integer, floating, string, std::pair or std::tuple datatypes as keys. There are no restrictions on the value datatypes.
 
-The iterators behave slightly differently from STL iterators but are meant to iterate linearly as though it is a vector. They do retain their position after insertion or deletion, although accessing an iterator after the deletion of that node is dangerous. Note that there is no reverse iterator, but we can start from end() and go -- (backward) instead of ++ (forward). The function end() serves as the STL rbegin() and is the largest (by ordering) element in the dictionary, while begin() is the smallest. Once an iterator crosses the bounds of the dictionary, it cannot be used anymore, nor can it reach the dictionary. At that stage, it becomes a null iterator. There is no equivalent of STL end() or rend() from which the iterator can go back to the (largest) element in the dictionary.
+The iterators behave slightly differently from STL iterators but are meant to iterate linearly as though it is a vector. They do retain their position after insertion or deletion, although accessing an iterator after the deletion of that node is dangerous. Note that there is no reverse iterator, but we can start from end() and go -- (backward) instead of ++ (forward). It supports jump-across-n-elements (+= and -= operators) too.
+
+The function end() serves as the STL rbegin() and is the largest (by ordering) element in the dictionary, while begin() is the smallest. Once an iterator crosses the bounds of the dictionary, it cannot be used anymore, nor can it reach the dictionary. At that stage, it becomes a null iterator. There is no equivalent of STL end() or rend() from which the iterator can go back to the (largest) element in the dictionary.
 
 ```
 template <typename T, typename U> 
@@ -33,7 +35,7 @@ class dict {
         operator ++, --, += (int), -= (int);
         bool isBegin();
         bool isEnd();
-        isNull(); 
+        bool isNull(); 
     };
 };
 ```
