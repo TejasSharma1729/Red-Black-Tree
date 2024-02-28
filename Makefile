@@ -1,8 +1,3 @@
-CXX=clang++
-CXXFLAGS=-g -std=c++23 -march=native -stdlib=libc++ -O3
-LDFLAGS=-fuse-ld=lld
-WFLAGS=-Wall -Wextra -Wpedantic -Wshadow
-RUNFLAGS=-fsanitize=undefined,address,leak,bounds
 EXECFILES=test_dict
 
 all: $(EXECFILES)
@@ -10,7 +5,9 @@ all: $(EXECFILES)
 	./$^
 
 %: %.cpp
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(WFLAGS) $(RUNFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) -O3 $^ $(LDFLAGS) -o $@
 
 clean:
-	rm $(EXECFILES)
+	rm -rf $(EXECFILES)
+
+.PHONY: all

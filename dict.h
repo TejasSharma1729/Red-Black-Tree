@@ -1,23 +1,8 @@
 #include <iostream>
-#include <string>
-#include <vector>
-using namespace std;
-
-template <typename T, typename U>
-struct Pair {
-	T first;
-	U second;
-    Pair() {}
-    Pair(T a, U b): first(a), second(b) {}
-    bool operator == (Pair& B) {
-        return (first == B.first && second == B.second);
-    }
-    bool operator < (Pair& B) {
-        if (first < B.first) return true;
-        if (first == B.first) return (second < B.second);
-        return false;
-    }
-};
+#include <compare>
+#include <concepts>
+#include <utility>
+#include <climits>
 
 /*
 template <typename T, typename U> class dict {
@@ -72,20 +57,15 @@ private:
 	int length;
 };
 // IT IS SINGLEMAP, WELL ORDERED KEY WITH == AND < DEFINED AND ANY NON-VOID VALUE 
-// SUGGESTIONS: Set: boolean value (false?) or int8_t;   Multiset: int/uint (for no. of entries), remove if 0, first insertion 1;
-// Map: the usual value_datatype;   Multimap: vector<value_datatype>, remove if empty, first insertion add element.
+// SUGGESTIONS: Set: boolean value (false?) or int8_t;   
+// Multiset: int/uint (for no. of entries), remove if 0, first insertion 1;
+// Map: the usual value_datatype;  
+// Multimap: vector<value_datatype>, remove if empty, first insertion add element.
 */
 
-template <typename T, typename U>
+template <std::totally_ordered T, typename U>
 class dict {
 private:
-template <typename V>
-	struct Tuple {
-		V* first;
-		U second;
-		int8_t third;
-	};
-
 	struct rbNode {
 		T key;
 		U val;
@@ -121,7 +101,8 @@ template <typename V>
 				if (left == nullptr) return;
 				rbNode* temp = left;
 				temp->parent = parent;
-				if (parent != nullptr) {
+				if
+                    (parent != nullptr) {
 					if (parent->left == this) parent->left = temp;
 					else parent->right = temp;
 				}
@@ -144,7 +125,7 @@ template <typename V>
 				if (right != nullptr) right->parent = this;
 			}
 			else {
-				throw invalid_argument("\nSide to Elevate in Rotation: -1(Left) or +1(Right)");
+				throw std::invalid_argument("\nElevate Side in Rotation: -1(Left) or +1(Right)");
 			}
 		}
 
@@ -160,9 +141,9 @@ template <typename V>
 			}
 		}
 
-		rbNode* insert(Pair<T, U> data) {
+		rbNode* insert(std::pair<T, U> data) {
 			if (data.first == key) 
-			throw invalid_argument("\nDuplicate Entries Error");
+			throw std::invalid_argument("\nDuplicate Entries Error");
 			if (data.first < key) {
 				if (left == nullptr) {
 					left = new rbNode(data.first, data.second);
@@ -181,7 +162,7 @@ template <typename V>
 			}
 		}
 
-		Tuple<rbNode> remove(T k) {
+        std::tuple<rbNode*, U, int8_t> remove(T k) {
 			U v = val;
 			int8_t side; // side in which something was removed.
 			if (k == key) {
@@ -274,11 +255,11 @@ template <typename V>
 			}
 			else if (k < key) {
 				if (left != nullptr) return left->remove(k);
-				else throw invalid_argument("\nDelete Nonexistant Key Error");
+				else throw std::invalid_argument("\nDelete Nonexistant Key Error");
 			}
 			else {
 				if (right != nullptr) return right->remove(k);
-				else throw invalid_argument("\nDelete Nonexistant Key Error");
+				else throw std::invalid_argument("\nDelete Nonexistant Key Error");
 			}
 		}
 
@@ -335,7 +316,8 @@ template <typename V>
 	}
 
 	void balanceDelete(rbNode* temp, int side) {
-		if (temp == nullptr || side == 0) return; // Root deleted -- only one left node OR red node deleted.
+		if (temp == nullptr || side == 0) return; 
+        // Root deleted -- only one left node OR red node deleted.
 		if (side == -1) {
 			if (temp->left != nullptr && temp->left->color == 1) {
 				temp->left->color = 0;
@@ -443,7 +425,7 @@ template <typename V>
 	}
 
 	rbNode* root = nullptr;
-	int length = 0;
+	size_t length = 0;
 
 public:
 	dict() {root = nullptr; length = 0;}
@@ -464,7 +446,7 @@ public:
 		root = nullptr;
 		length = 0;
 	}
-	int size() {return length;}
+	size_t size() {return length;}
 	bool empty() {return (length == 0);}
 
 	class iterator {
@@ -563,10 +545,10 @@ public:
 			return temp;
 		}
 
-		void operator += (int n) {
+		void operator += (long n) {
 			if (n == 0) return;
 			if (n > 0) {
-				for (int i = 0; i < n; i++) {
+				for (long i = 0; i < n; i++) {
 					if (node == nullptr) return;
 					else if (node->right != nullptr) {
 						node = node->right;
@@ -582,7 +564,7 @@ public:
 			}
 			else {
 				n *= -1;
-				for (int i = 0; i < n; i++) {
+				for (long i = 0; i < n; i++) {
 					if (node == nullptr) return;
 					else if (node->left != nullptr) {
 						node = node->left;
@@ -598,15 +580,15 @@ public:
 			}
 		}
 
-		void operator -= (int n) {
+		void operator -= (long n) {
 			*this += (-n);
 		}
 	};
 
 	U at(T key) {
-		if (root == nullptr) throw invalid_argument("\nNot Found Error");
+		if (root == nullptr) throw std::invalid_argument("\nNot Found Error");
 		rbNode* val = (root->find(key));
-		if (val == nullptr) throw invalid_argument("\nNot Found Error");
+		if (val == nullptr) throw std::invalid_argument("\nNot Found Error");
 		return *val;
 	}
 
@@ -659,22 +641,35 @@ public:
 		}
 	}
 
+	void insert(std::pair<T, U> data) {
+		if (root == nullptr) {
+			length++;
+			root = new rbNode(data.first, data.second);
+			root->color = 0;
+		}
+		else {
+			rbNode* temp = root->insert({data.first, data.second});
+			length++;
+			balanceInsert(temp);
+		}
+	}
+
 	U remove(T key) {
 		if (root == nullptr) 
-			throw invalid_argument("\nDelete Nonexistant Key Error");
-		Tuple<rbNode> temp = root->remove(key);
+			throw std::invalid_argument("\nDelete Nonexistant Key Error");
+        std::tuple<rbNode*, U, int8_t> temp = root->remove(key);
 		length--;
-		if (temp.third == 2) root = temp.first;
-		else if (temp.third == 3 || temp.third == -3 || temp.third == 6) 
+		if (get<2>(temp) == 2) root = get<0>(temp);
+		else if (get<2>(temp) == 3 || get<2>(temp) == -3 || get<2>(temp) == 6) 
 		{
-			auto s = temp.first;
+			auto s = get<0>(temp);
 			while (s->parent != nullptr) s = s->parent;
 			root = s;
-			temp.third /= 3;
-			if (temp.third == 2) temp.third = 0;
-			balanceDelete(temp.first, temp.third);
+			get<2>(temp) /= 3;
+			if (get<2>(temp) == 2) get<2>(temp) = 0;
+			balanceDelete(get<0>(temp), get<2>(temp));
 		}
-		else balanceDelete(temp.first, temp.third);
-		return temp.second;
+		else balanceDelete(get<0>(temp), get<2>(temp));
+		return get<1>(temp);
 	}
 };
